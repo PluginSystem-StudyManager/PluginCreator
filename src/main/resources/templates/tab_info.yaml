@@ -1,0 +1,18 @@
+# [metadata]
+name: TAB_NAME
+shortDescription: SHORT_DESCRIPTION
+
+# [metadata] optional
+authors:
+  - AUTHOR_1
+version: '1.0'
+repository: 'REPOSITORY_URL'
+tags:
+  - TAG_1
+  - TAG_2
+languages:
+  - de
+  - en
+
+# [options] optional
+allowMultipleInstallations: false
