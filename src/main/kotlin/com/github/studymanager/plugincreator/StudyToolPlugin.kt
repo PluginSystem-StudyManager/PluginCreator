@@ -38,6 +38,7 @@ class StudyToolPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         // Plugin dependencies
         project.plugins.apply("java")
+        project.plugins.apply("org.openjfx.javafxplugin")
         project.plugins.apply("net.anshulverma.gradle.fileupload")
 
         // Extension
