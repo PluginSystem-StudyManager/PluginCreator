@@ -1,11 +1,13 @@
 package com.github.studymanager.plugincreator
 
 import groovy.lang.Closure
+import io.github.rybalkinsd.kohttp.dsl.async.httpPostAsync
+import io.github.rybalkinsd.kohttp.dsl.httpPost
 import io.github.rybalkinsd.kohttp.dsl.upload
+import io.github.rybalkinsd.kohttp.ext.url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
-import net.anshulverma.gradle.fileupload.FileUploadExtension
 import org.codehaus.groovy.ast.tools.GeneralUtils.params
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
@@ -39,7 +41,6 @@ class StudyToolPlugin : Plugin<Project> {
         // Plugin dependencies
         project.plugins.apply("java")
         project.plugins.apply("org.openjfx.javafxplugin")
-        project.plugins.apply("net.anshulverma.gradle.fileupload")
 
         // Extension
         val ext = project.extensions.create<StudyToolExtension>("StudyTool", StudyToolExtension::class.java)
@@ -75,7 +76,6 @@ class StudyToolPlugin : Plugin<Project> {
         // Task dependencies
         project.tasks.getByPath(TASK_BUILD_PUBLISH).dependsOn("jar", TASK_CHECK)
         project.tasks.getByPath(TASK_PUBLISH).dependsOn(TASK_BUILD_PUBLISH)
-        project.tasks.getByPath(TASK_PUBLISH).finalizedBy(project.tasks.getByPath("fileupload"))
     }
 }
 
@@ -116,14 +116,27 @@ open class PublishTask : DefaultTask() {
     fun publishStudyPlugin() {
         println("Hello: Publishing!")
         val task = project.tasks.getByPath(TASK_BUILD_PUBLISH)
-        val ext = project.extensions.getByType(StudyToolExtension::class.java)
 
         if (task is BuildPublishTask) {
             val filePath = File("${task.destinationDirectory.get()}", task.archiveFileName.get())
-            val fileUploadExt = project.extensions.getByType(FileUploadExtension::class.java)
-            fileUploadExt.url = "http://127.0.0.1:8080/api/plugins/upload"
-            fileUploadExt.file = filePath.path
-            fileUploadExt.params["name"] = ext.id
+            val response = httpPost {
+                url("http://127.0.0.1:8080/api/plugins/upload")
+
+                header {
+                    cookie {
+                        // TODO: Adjust Cookie
+                        "token" to "12345"
+                        "pluginName" to "ExamplePlugin"
+                    }
+                }
+
+                multipartBody("multipart/form-data") {
+                    +part("file", filename = filePath.path) {
+                        file(filePath)
+                    }
+                }
+            }
+            println("Upload: ${response.isSuccessful} with body: ${response.body()}")
         }
     }
 }
@@ -167,7 +180,7 @@ open class InitProjectFilesTask : DefaultTask() {
                 "main.fxml" to "src/main/resources/main.fxml",
                 "settings.fxml" to "src/main/resources/settings.fxml",
                 "README.md" to "README.md",
-                "tab_info.yaml" to "info/tab_info.yaml",
+                "plugin_info.yaml" to "info/plugin_info.yaml",
                 "gitignore.txt" to ".gitignore" // .txt because otherwise can't find resource
         )
         for (e in mapping.entries) {
