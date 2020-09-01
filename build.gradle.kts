@@ -13,6 +13,7 @@ repositories {
 }
 
 version = "0.1"
+group = "com.github.studymanager.plugincreator"
 
 dependencies {
     implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
@@ -23,11 +24,11 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        create("studyToolPlugin") {
-            id = "com.github.juliansobott.studytoolplugin"
+        create("plugincreator") {
+            id = "com.github.studymanager.plugincreator"
             displayName = "Study Tool Plugin"
             description = "Develop and publish your own plugin for the 'StudyTool'."
-            implementationClass = "com.github.juliansobott.studytoolplugin.StudyToolPlugin"
+            implementationClass = "com.github.studymanager.plugincreator.StudyToolPlugin"
         }
     }
 }
@@ -35,8 +36,8 @@ gradlePlugin {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "com.github.juliansobott.studytoolplugin"
-            artifactId = "StudyToolPlugin"
+            groupId = "com.github.studymanager.plugincreator"
+            artifactId = "plugincreator"
             version = "0.1"
 
             from(components["kotlin"])

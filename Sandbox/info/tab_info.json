@@ -1,0 +1,11 @@
+{
+  "Name": "Timetable",
+  "Tooltip": "View of the weekly timetable",
+  "Description": "Plan your personal timetable for your studying.",
+  "Authors": [
+    "Lukas Mendel",
+    "Julian Sobott"
+  ],
+  "Version": "1.0",
+  "Repository": "some github repository"
+}

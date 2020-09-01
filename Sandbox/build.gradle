@@ -1,0 +1,18 @@
+plugins {
+    id 'com.github.studymanager.plugincreator' version '0.1'
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
+}
+
+StudyTool {
+    id = "Timetable"
+    loadData {
+        windowFxml = "de/students/timetable/main.fxml"
+        settingsFxml = "de/students/timetable/settings.fxml"
+    }
+}

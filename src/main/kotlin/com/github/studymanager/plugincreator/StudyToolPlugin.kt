@@ -1,4 +1,4 @@
-package com.github.juliansobott.studytoolplugin
+package com.github.studymanager.plugincreator
 
 import groovy.lang.Closure
 import io.github.rybalkinsd.kohttp.dsl.upload
@@ -120,7 +120,7 @@ open class PublishTask : DefaultTask() {
         if (task is BuildPublishTask) {
             val filePath = File("${task.destinationDirectory.get()}", task.archiveFileName.get())
             val fileUploadExt = project.extensions.getByType(FileUploadExtension::class.java)
-            fileUploadExt.url = "http://127.0.0.1:8080/plugins/upload"
+            fileUploadExt.url = "http://127.0.0.1:8080/api/plugins/upload"
             fileUploadExt.file = filePath.path
             fileUploadExt.params["name"] = ext.id
         }
