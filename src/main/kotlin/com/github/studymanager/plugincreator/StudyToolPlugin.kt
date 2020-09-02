@@ -34,6 +34,10 @@ const val TASK_INIT = "initProject"
 
 const val META_FILE = "plugin_load.json"
 
+// Currently one token per account. Maybe change to one token per plugin. If so add attribute to Extension
+const val TOKEN_PROPERTY = "studytool.token"
+const val EXTENSION_NAME = "StudyTool"
+
 class StudyToolPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         // Plugin dependencies
@@ -41,7 +45,7 @@ class StudyToolPlugin : Plugin<Project> {
         project.plugins.apply("org.openjfx.javafxplugin")
 
         // Extension
-        val ext = project.extensions.create<StudyToolExtension>("StudyTool", StudyToolExtension::class.java)
+        val ext = project.extensions.create<StudyToolExtension>(EXTENSION_NAME, StudyToolExtension::class.java)
 
         // Config
         val extJar = project.tasks.getByName("jar")
@@ -116,19 +120,22 @@ open class PublishTask : DefaultTask() {
 
     @TaskAction
     fun publishStudyPlugin() {
-        println("Hello: Publishing!")
         val task = project.tasks.getByPath(TASK_BUILD_PUBLISH)
+        val extension = project.extensions.getByName(EXTENSION_NAME) as StudyToolExtension
 
         if (task is BuildPublishTask) {
             val filePath = File("${task.destinationDirectory.get()}", task.archiveFileName.get())
+            // Token is stored in GRADLE_HOME/gradle.properties
+            val token = project.findProperty(TOKEN_PROPERTY) as String
+            val pluginName = extension.id
+
             val response = httpPost {
                 url("http://127.0.0.1:8080/api/plugins/upload")
 
                 header {
                     cookie {
-                        // TODO: Adjust Cookie
-                        "token" to "12345"
-                        "pluginName" to "ExamplePlugin"
+                        "token" to token
+                        "pluginName" to pluginName
                     }
                 }
 
@@ -138,7 +145,11 @@ open class PublishTask : DefaultTask() {
                     }
                 }
             }
-            println("Upload: ${response.isSuccessful} with body: ${response.body()}")
+            if (response.isSuccessful) {
+                println("Successfully published")
+            } else {
+                println("Publish failed: ${response.message()} with message: ${response.body().toString()}")
+            }
         }
     }
 }
