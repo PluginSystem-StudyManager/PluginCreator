@@ -1,6 +1,6 @@
 # [metadata]
-name: TAB_NAME
-shortDescription: SHORT_DESCRIPTION
+name: ExamplePlugin
+shortDescription: My first plugin
 
 # [metadata] optional
 authors:

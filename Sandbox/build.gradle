@@ -12,7 +12,7 @@ repositories {
 }
 
 StudyTool {
-    id = "Timetable"
+    id = "ExamplePlugin"
     loadData {
         windowFxml = "main.fxml"
         settingsFxml = "settings.fxml"

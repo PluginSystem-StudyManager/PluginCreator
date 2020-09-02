@@ -1,17 +1,15 @@
 package com.github.studymanager.plugincreator
 
 import groovy.lang.Closure
-import io.github.rybalkinsd.kohttp.dsl.async.httpPostAsync
 import io.github.rybalkinsd.kohttp.dsl.httpPost
-import io.github.rybalkinsd.kohttp.dsl.upload
 import io.github.rybalkinsd.kohttp.ext.url
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
-import org.codehaus.groovy.ast.tools.GeneralUtils.params
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
@@ -59,7 +57,7 @@ class StudyToolPlugin : Plugin<Project> {
         // Edit tasks
         project.tasks.getByPath("jar").doFirst {
             if (it is Jar) {
-                it.archiveFileName.set("${ext.id}.jar")
+                it.archiveFileName.set("plugin_${ext.id}.jar")
                 // create meta file
                 val json = Json(JsonConfiguration.Stable)
                 val data = json.stringify(LoadDataExtension.serializer(), ext.loadDataSettings)
@@ -67,7 +65,9 @@ class StudyToolPlugin : Plugin<Project> {
                 val path = "build/resources/$META_FILE"
                 File(path).writeText(data)
                 // add meta file
-                it.from(path)
+                // Paths are explicitly added, because otherwise the jar isn't build. This needs to be checked and maybe cleaned up
+                it.from(path, "build/classes/java/main", "build/resources/main")    // TODO: more generic paths
+                it.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
             } else {
                 // Empty: Project is wrong configured
             }
@@ -91,6 +91,8 @@ open class CheckTask : DefaultTask() {
         // Get Meta file
         // Check existence of fxml paths
         // Check existence of info files
+        // Check names and ids are correctly set
+        // plugin_info.yaml is correct
     }
 }
 
@@ -175,8 +177,8 @@ open class InitProjectFilesTask : DefaultTask() {
     @TaskAction
     fun initFiles() {
         val mapping = mapOf(
-                "MainController.java" to "src/main/java/MainController.java",
-                "SettingsController.java" to "src/main/java/SettingsController.java",
+                "MainController.java" to "src/main/java/main/MainController.java",
+                "SettingsController.java" to "src/main/java/main/SettingsController.java",
                 "main.fxml" to "src/main/resources/main.fxml",
                 "settings.fxml" to "src/main/resources/settings.fxml",
                 "README.md" to "README.md",
