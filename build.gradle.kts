@@ -7,6 +7,9 @@ plugins {
 }
 
 repositories {
+    maven {
+        setUrl("https://plugins.gradle.org/m2/")
+    }
     mavenCentral()
     jcenter()
 }
@@ -19,14 +22,15 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0")
     implementation(group = "io.github.rybalkinsd", name = "kohttp", version = "0.12.0")
     implementation("org.apache.httpcomponents:httpclient:4.5.12")
+    implementation("org.openjfx:javafx-plugin:0.0.9")
 }
 
 gradlePlugin {
     plugins {
         create("plugincreator") {
             id = "com.github.studymanager.plugincreator"
-            displayName = "Study Tool Plugin"
-            description = "Develop and publish your own plugin for the 'StudyTool'."
+            displayName = "StudyManager Plugin Creator"
+            description = "Develop and publish your own plugin for the 'StudyManager'."
             implementationClass = "com.github.studymanager.plugincreator.StudyToolPlugin"
         }
     }
@@ -47,8 +51,7 @@ publishing {
 
 
 pluginBundle {
-    website = "https://github.com/JulianSobott/TimeManager"
-    vcsUrl = "https://github.com/JulianSobott/TimeManager"
-    tags = listOf("studymanager", "plugin", "java")
+    website = "https://github.com/PluginSystem-StudyManager/PluginCreator"
+    vcsUrl = "https://github.com/PluginSystem-StudyManager/PluginCreator"
+    tags = listOf("StudyManager", "StudyManager-PluginCreator")
 }
-

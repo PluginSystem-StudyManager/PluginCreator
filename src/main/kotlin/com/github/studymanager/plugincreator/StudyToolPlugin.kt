@@ -13,6 +13,7 @@ import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
+import org.openjfx.gradle.JavaFXOptions
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -46,6 +47,8 @@ class StudyToolPlugin : Plugin<Project> {
 
         // Extension
         val ext = project.extensions.create<StudyToolExtension>(EXTENSION_NAME, StudyToolExtension::class.java)
+        val jfxExtension = project.extensions.getByName("javafx") as JavaFXOptions
+        jfxExtension.modules = listOf("javafx.controls", "javafx.fxml", "javafx.web")
 
         // Config
         val extJar = project.tasks.getByName("jar")
@@ -95,6 +98,7 @@ open class CheckTask : DefaultTask() {
         // Get Meta file
         // Check existence of fxml paths
         // Check existence of info files
+        // Check existence of icon + preview image
         // Check names and ids are correctly set
         // plugin_info.yaml is correct
     }
@@ -194,7 +198,9 @@ open class InitProjectFilesTask : DefaultTask() {
                 "settings.fxml" to "src/main/resources/settings.fxml",
                 "README.md" to "README.md",
                 "plugin_info.yaml" to "info/plugin_info.yaml",
-                "gitignore.txt" to ".gitignore" // .txt because otherwise can't find resource
+                "gitignore.txt" to ".gitignore", // .txt because otherwise can't find resource
+                "icon.png" to "info/img/icon.png",
+                "preview_1.png" to "info/img/preview_1.png"
         )
         for (e in mapping.entries) {
             val sourceStream = javaClass.getResourceAsStream("/templates/${e.key}")

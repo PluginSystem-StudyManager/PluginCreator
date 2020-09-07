@@ -1,14 +1,10 @@
 plugins {
     id 'com.github.studymanager.plugincreator' version '0.1'
-    id 'org.openjfx.javafxplugin' version '0.0.8' // TODO: Add this to plugin
 }
 
 repositories {
     mavenLocal()
     jcenter()
-    maven {
-        url "https://plugins.gradle.org/m2/"
-    }
 }
 
 StudyTool {
@@ -17,8 +13,4 @@ StudyTool {
         windowFxml = "main.fxml"
         settingsFxml = "settings.fxml"
     }
-}
-
-javafx {
-    modules = ["javafx.controls", "javafx.fxml", "javafx.web"]
 }
