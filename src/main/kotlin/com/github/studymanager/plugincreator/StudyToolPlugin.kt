@@ -9,7 +9,6 @@ import kotlinx.serialization.json.JsonConfiguration
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
@@ -71,10 +70,9 @@ class StudyToolPlugin : Plugin<Project> {
                 println(data)
                 val path = "build/resources/$META_FILE"
                 File(path).writeText(data)
+
                 // add meta file
-                // Paths are explicitly added, because otherwise the jar isn't build. This needs to be checked and maybe cleaned up
-                it.from(path, "build/classes/java/main", "build/resources/main")    // TODO: more generic paths
-                it.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                it.rootSpec.from(path)
             } else {
                 // Empty: Project is wrong configured
             }
@@ -125,7 +123,7 @@ open class PublishTask : DefaultTask() {
     @TaskAction
     fun publishStudyPlugin() {
         val task = project.tasks.getByPath(TASK_BUILD_PUBLISH)
-        val extension = project.extensions.getByName(EXTENSION_NAME) as StudyToolExtension
+        val extension = getExtension(project)
 
         if (task is BuildPublishTask) {
             val filePath = File("${task.destinationDirectory.get()}", task.archiveFileName.get())
@@ -168,18 +166,7 @@ open class BuildPublishTask : Zip() {
         destinationDirectory.set(File("build/"))
 
         // info files TODO: get extensions value
-        val ext = project.extensions.getByType(StudyToolExtension::class.java)
-        val infoPath = project.projectDir.path.plus("\\${ext.infoPath}")
-        val infoFiles = File(infoPath)
-        if (!infoFiles.exists()) {
-            throw FileNotFoundException("Info folder not found: $infoPath")
-        }
-        into("info") { inner ->
-            inner.from(infoFiles)
-        }
 
-        // jar file
-        from(File("build/libs"))
     }
 }
 
@@ -218,8 +205,8 @@ open class InitProjectFilesTask : DefaultTask() {
 
 
 open class StudyToolExtension {
-    var infoPath: String = "info"
-    var id: String = "TestID"
+    var infoPath: String = "invalid"
+    var id: String = "invalid"
     var loadDataSettings: LoadDataExtension = LoadDataExtension()
 
     fun loadData(closure: Closure<Any>) {
@@ -231,7 +218,12 @@ open class StudyToolExtension {
 
 @Serializable
 open class LoadDataExtension {
-    var windowFxml: String = "main.fxml"
-    var settingsFxml: String = "settings.fxml"
-    var icon: String = "icon.png"
+    var windowFxml: String = "invalid"
+    var settingsFxml: String = "invalid"
+    var icon: String = "invalid"
+}
+
+
+fun getExtension(project: Project): StudyToolExtension {
+    return project.extensions.getByName(EXTENSION_NAME) as StudyToolExtension
 }
