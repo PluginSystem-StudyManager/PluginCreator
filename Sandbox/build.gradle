@@ -9,8 +9,10 @@ repositories {
 
 StudyTool {
     id = "ExamplePlugin"
+    infoPath = "info"
     loadData {
         windowFxml = "main.fxml"
         settingsFxml = "settings.fxml"
+        icon = "icon.png"
     }
 }

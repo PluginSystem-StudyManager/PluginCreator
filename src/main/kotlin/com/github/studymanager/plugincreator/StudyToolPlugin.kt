@@ -31,6 +31,7 @@ const val TASK_BUILD_PUBLISH = "buildPublish"
 const val TASK_CHECK = "checkPlugin"
 const val TASK_TEST = "testPlugin"
 const val TASK_INIT = "initProject"
+const val TASK_CONFIGURE = "configStudyTool"
 
 const val META_FILE = "plugin_load.json"
 
@@ -54,6 +55,7 @@ class StudyToolPlugin : Plugin<Project> {
 
 
         // Register tasks
+        project.tasks.register<ConfigureTask>(TASK_CONFIGURE, ConfigureTask::class.java)
         project.tasks.register<BuildPublishTask>(TASK_BUILD_PUBLISH, BuildPublishTask::class.java)
         project.tasks.register<PublishTask>(TASK_PUBLISH, PublishTask::class.java)
         project.tasks.register<CheckTask>(TASK_CHECK, CheckTask::class.java)
@@ -79,7 +81,7 @@ class StudyToolPlugin : Plugin<Project> {
         }
 
         // Task dependencies
-        project.tasks.getByPath(TASK_BUILD_PUBLISH).dependsOn("jar", TASK_CHECK)
+        project.tasks.getByPath(TASK_BUILD_PUBLISH).dependsOn("jar", TASK_CHECK, TASK_CONFIGURE)
         project.tasks.getByPath(TASK_PUBLISH).dependsOn(TASK_BUILD_PUBLISH)
     }
 }
@@ -111,6 +113,10 @@ open class TestPluginTask : DefaultTask() {
     @TaskAction
     fun testPlugin() {
         println("Hello: testing!")
+        val ext = getExtension(project)
+        println(ext.id)
+        println(ext.infoPath)
+        println(ext.loadDataSettings.windowFxml)
     }
 }
 
@@ -126,7 +132,8 @@ open class PublishTask : DefaultTask() {
         val extension = getExtension(project)
 
         if (task is BuildPublishTask) {
-            val filePath = File("${task.destinationDirectory.get()}", task.archiveFileName.get())
+            // TODO adjust file path
+            val filePath = File("${task.destinationDirectory}", task.archiveFileName.get())
             // Token is stored in GRADLE_HOME/gradle.properties
             val token = project.findProperty(TOKEN_PROPERTY) as String
             val pluginName = extension.id
@@ -157,16 +164,46 @@ open class PublishTask : DefaultTask() {
 }
 
 
+open class ConfigureTask : DefaultTask() {
+
+    init {
+        description = "Internal task to configure the other tasks"
+    }
+
+    @TaskAction
+    fun configure() {
+        val buildTask = project.tasks.getByPath(TASK_BUILD_PUBLISH) as BuildPublishTask
+        buildTask.setup()
+    }
+
+}
+
 open class BuildPublishTask : Zip() {
+
+
 
     init {
         group = GROUP
 
         archiveBaseName.set("publish")
         destinationDirectory.set(File("build/"))
+    }
 
-        // info files TODO: get extensions value
+    fun setup() {
+        val ext = getExtension(project)
 
+        // add Info files
+        val infoPath = project.projectDir.path.plus("\\${ext.infoPath}")
+        val infoFiles = File(infoPath)
+        if (!infoFiles.exists()) {
+            throw FileNotFoundException("Info folder not found: $infoPath")
+        }
+        into("info") { inner ->
+            inner.from(infoFiles)
+        }
+
+        // add Jar file
+        from("build/libs")
     }
 }
 
