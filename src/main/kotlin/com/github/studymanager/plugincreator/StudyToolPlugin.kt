@@ -62,26 +62,9 @@ class StudyToolPlugin : Plugin<Project> {
         project.tasks.register<TestPluginTask>(TASK_TEST, TestPluginTask::class.java)
         project.tasks.register<InitProjectFilesTask>(TASK_INIT, InitProjectFilesTask::class.java)
 
-        // Edit tasks
-        project.tasks.getByPath("jar").doFirst {
-            if (it is Jar) {
-                it.archiveFileName.set("plugin_${ext.id}.jar")
-                // create meta file
-                val json = Json(JsonConfiguration.Stable)
-                val data = json.stringify(LoadDataExtension.serializer(), ext.loadDataSettings)
-                println(data)
-                val path = "build/resources/$META_FILE"
-                File(path).writeText(data)
-
-                // add meta file
-                it.rootSpec.from(path)
-            } else {
-                // Empty: Project is wrong configured
-            }
-        }
-
         // Task dependencies
         project.tasks.getByPath(TASK_BUILD_PUBLISH).dependsOn("jar", TASK_CHECK, TASK_CONFIGURE)
+        project.tasks.getByPath("jar").dependsOn(TASK_CONFIGURE)
         project.tasks.getByPath(TASK_PUBLISH).dependsOn(TASK_BUILD_PUBLISH)
     }
 }
@@ -135,7 +118,6 @@ open class PublishTask : DefaultTask() {
         val extension = getExtension(project)
 
         if (task is BuildPublishTask) {
-            // TODO adjust file path
             val filePath = File("${task.destinationDirectory}", task.archiveFileName.get())
             // Token is stored in GRADLE_HOME/gradle.properties
             val token = project.findProperty(TOKEN_PROPERTY) as String
@@ -175,8 +157,23 @@ open class ConfigureTask : DefaultTask() {
 
     @TaskAction
     fun configure() {
+        val ext = getExtension(project)
+
+        // build task
         val buildTask = project.tasks.getByPath(TASK_BUILD_PUBLISH) as BuildPublishTask
         buildTask.setup()
+
+        // Jar task
+        val jarTask = project.tasks.getByPath("jar") as Jar
+        jarTask.archiveFileName.set("plugin_${ext.id}.jar")
+        // create meta file
+        val json = Json(JsonConfiguration.Stable)
+        val data = json.stringify(LoadDataExtension.serializer(), ext.loadDataSettings)
+        val path = "build/resources/$META_FILE"
+        File(path).writeText(data)
+
+        // add meta file
+        jarTask.from(path)
     }
 
 }
