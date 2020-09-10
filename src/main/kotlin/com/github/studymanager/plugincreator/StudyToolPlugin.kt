@@ -90,6 +90,7 @@ open class CheckTask : DefaultTask() {
 
     init {
         group = GROUP
+        description = "Checks if the plugin is a valid plugin that can be published"
     }
 
     @TaskAction
@@ -108,6 +109,7 @@ open class TestPluginTask : DefaultTask() {
 
     init {
         group = GROUP
+        description = "Runs the plugin in the application"
     }
 
     @TaskAction
@@ -124,6 +126,7 @@ open class PublishTask : DefaultTask() {
 
     init {
         group = GROUP
+        description = "Publishes the plugin"
     }
 
     @TaskAction
@@ -184,6 +187,7 @@ open class BuildPublishTask : Zip() {
 
     init {
         group = GROUP
+        description = "Build all necessary files for publishing"
 
         archiveBaseName.set("publish")
         destinationDirectory.set(File("build/"))
@@ -211,6 +215,7 @@ open class InitProjectFilesTask : DefaultTask() {
 
     init {
         group = GROUP
+        description = "Create all files that are needed for a valid plugin"
     }
 
     @TaskAction
